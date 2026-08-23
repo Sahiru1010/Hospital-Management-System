@@ -1,47 +1,40 @@
 package org.example.hospital_management_system.Service;
 
-import org.example.hospital_management_system.DTO.Request.PatientRequest;
-import org.example.hospital_management_system.DTO.Response.PatientResponse;
 import org.example.hospital_management_system.Entity.Patient;
-
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import org.example.hospital_management_system.Repository.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Map;
-
-import org.example.hospital_management_system.Repository.PatientRepo;
+import java.util.Optional;
 
 @Service
-@Transactional
 public class PatientService {
 
     @Autowired
     private PatientRepo patientRepo;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    public PatientResponse addPatient(PatientRequest requestDTO) {
-        // 1. Map RequestDTO to Entity
-        Patient patient = modelMapper.map(requestDTO, Patient.class);
-
-        // 2. Save Entity to database
-        Patient savedPatient = patientRepo.save(patient);
-
-        // 3. Map saved Entity back to ResponseDTO
-        return modelMapper.map(savedPatient, PatientResponse.class);
+    //READ (Get All Patients)
+    public List<Patient> getAllPatients() {
+        return patientRepo.findAll();
     }
 
-    public List<PatientResponse> getAllPatients() {
-        List<Patient> patients = patientRepo.findAll();
-        return modelMapper.map(patients, new TypeToken<List<PatientResponse>>(){}.getType());
+    //READ (Get One Patient by ID)
+    public Optional<Patient> getPatientById(String patientId) {
+        return patientRepo.findById(patientId);
     }
 
-    public List<Map<String, Object>> getPatientsWithMultipleAppointments(){
-        return patientRepo.findPatientsWithMultipleAppointments();
+    //CREATE & UPDATE (Save Patient)
+    public Patient savePatient(Patient patient) {
+        return patientRepo.save(patient);
+    }
+
+    //DELETE (Remove Patient)
+    public void deletePatient(String patientId) {
+        patientRepo.deleteById(patientId);
+    }
+
+    public List<Patient> searchPatientsByName(String name) {
+        return patientRepo.findByFullNameContainingIgnoreCase(name);
     }
 }

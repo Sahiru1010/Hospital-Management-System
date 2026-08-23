@@ -1,36 +1,43 @@
 package org.example.hospital_management_system.Service;
 
-
-import org.example.hospital_management_system.DTO.Request.DoctorRequestDTO;
-import org.example.hospital_management_system.DTO.Response.DoctorResponseDTO;
 import org.example.hospital_management_system.Entity.Doctor;
-import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
+import org.example.hospital_management_system.Repository.DoctorRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.example.hospital_management_system.Repository.DoctorRepo;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-@Transactional
-
 public class DoctorService {
 
     @Autowired
     private DoctorRepo doctorRepo;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
-    public DoctorResponseDTO addDoctor(DoctorRequestDTO requestDTO){
-        Doctor doctor = modelMapper.map(requestDTO, Doctor.class);
-        Doctor savedDoctor = doctorRepo.save(doctor);
-        return modelMapper.map(savedDoctor, DoctorResponseDTO.class);
+    //READ (Get All Doctors)
+    public List<Doctor> getAllDoctors() {
+        return doctorRepo.findAll();
     }
-    public List<DoctorResponseDTO> getAllDoctors(){
-        List<Doctor> doctors = doctorRepo.findAll();
-        return modelMapper.map(doctors, new TypeToken<List<DoctorResponseDTO>>(){}.getType());
+
+    //READ (Get One Doctor by ID)
+    public Optional<Doctor> getDoctorById(String doctorId) {
+        return doctorRepo.findById(doctorId);
+    }
+
+    //CREATE & UPDATE (Save Doctor)
+    public Doctor saveDoctor(Doctor doctor) {
+        return doctorRepo.save(doctor);
+    }
+
+    //DELETE (Remove Doctor)
+    public void deleteDoctor(String doctorId) {
+        doctorRepo.deleteById(doctorId);
+    }
+
+    public Doctor updateDoctor(Doctor doctor){
+        return doctorRepo.save(doctor);
+    }
+    public List<Doctor> searchDoctorByName(String name){
+        return doctorRepo.findByDoctorNameContainingIgnoreCase(name);
     }
 }

@@ -1,62 +1,56 @@
 package org.example.hospital_management_system.Service;
 
-import org.example.hospital_management_system.DTO.Request.AdmissionRequestDTO;
-import org.example.hospital_management_system.exception.BusinessRuleException;
 import org.example.hospital_management_system.Entity.Admission;
 import org.example.hospital_management_system.Entity.Room;
 import org.example.hospital_management_system.Repository.AdmissionRepo;
 import org.example.hospital_management_system.Repository.RoomRepo;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
-@Transactional
 public class AdmissionService {
 
-    @Autowired
-    private AdmissionRepo admissionRepo;
+    @Autowired private AdmissionRepo admissionRepo;
+    @Autowired private RoomRepo roomRepo;
+
     public List<Admission> getAllAdmissions() { return admissionRepo.findAll(); }
-    public Optional<Admission> getAdmissionById(String id) { return admissionRepo.findById(id); }
-    public void deleteAdmission(String id) { admissionRepo.deleteById(id); }
 
-
-
-    @Autowired
-    private RoomRepo roomRepo;
-
-    @Autowired
-    private ModelMapper modelMapper;
-
-    // --- Upgraded Admission Logic ---
+    //ADMIT PATIENT & ALLOCATE ROOM
     @Transactional
-    public Admission saveAdmission(Admission admission) {
-        // 1. Fetch the room the patient wants to stay in
-        String roomId = admission.getRoom().getRoomId();
-        Room room = roomRepo.findById(roomId)
-                .orElseThrow(() -> new BusinessRuleException("Room not found in database."));
+    public Admission admitPatient(Admission admission) {
+        Room room = roomRepo.findById(admission.getRoom().getRoomId())
+                .orElseThrow(() -> new RuntimeException("Room not found"));
 
-        // 2. Check if the room is already occupied
-        if (!room.getAvailabilityStatus().equalsIgnoreCase("Available")) {
-            throw new BusinessRuleException("Cannot admit patient. Room " + roomId + " is currently " + room.getAvailabilityStatus());
+        if ("Occupied".equalsIgnoreCase(room.getAvailabilityStatus())) {
+            throw new RuntimeException("Room is already occupied!");
         }
 
-        // 3. Mark the room as Occupied and save it
+        // Change room status to Occupied
         room.setAvailabilityStatus("Occupied");
         roomRepo.save(room);
 
-        // 4. Save the actual admission record
         return admissionRepo.save(admission);
     }
 
+    //DISCHARGE PATIENT
+    @Transactional
+    public Admission dischargePatient(String admissionId) {
+        Admission admission = admissionRepo.findById(admissionId)
+                .orElseThrow(() -> new RuntimeException("Admission not found"));
 
+        //Update Admission status and log the date
+        admission.setAdmissionStatus("Discharged");
+        admission.setDischargeDate(LocalDate.now());
 
+        //Free up the room
+        Room room = admission.getRoom();
+        room.setAvailabilityStatus("Available");
+        roomRepo.save(room);
+
+        return admissionRepo.save(admission);
     }
-
-
 }

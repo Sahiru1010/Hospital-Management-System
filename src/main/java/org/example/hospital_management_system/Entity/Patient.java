@@ -7,7 +7,8 @@ import java.time.LocalDate;
 
 @EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "PATIENT") // Matches SQL schema[cite: 5]
+@Table(name = "PATIENT")
+
 @Data
 public class Patient extends Person {
     @Id

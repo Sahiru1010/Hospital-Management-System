@@ -8,7 +8,8 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "DOCTOR")
-@AttributeOverride(name = "contactNumber", column = @Column(name = "Contact_Number", nullable = false, unique = true, length = 15))// Matches SQL schema
+
+@AttributeOverride(name = "contactNumber", column = @Column(name = "Contact_Number", nullable = false, unique = true, length = 15))
 @Data
 
 public class Doctor extends Person{
