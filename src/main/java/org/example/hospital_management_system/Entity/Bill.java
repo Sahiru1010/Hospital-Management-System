@@ -43,7 +43,7 @@ public class Bill {
     @Column(name = "Payment_Status", length = 50)
     private String paymentStatus = "Pending";
 
-    //Cash", "Credit Card", "Insurance"
+    //Cash, "Credit Card", "Insurance"
     @Column(name = "Payment_Method", length = 50)
     private String paymentMethod;
 }
